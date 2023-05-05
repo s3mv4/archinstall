@@ -70,52 +70,8 @@ fi
 genfstab -U /mnt >> /mnt/etc/fstab
 
 # Chroot
-arch-chroot /mnt
-
-# Time zone
-ln -sf /usr/share/zoneinfo/Europe/Amsterdam /etc/localtime
-
-# Localization
-sed -i 's/#en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/g' /etc/locale.gen
-locale-gen
-echo "LANG=en_US.UTF-8" > /etc/locale.conf
-echo "KEYMAP=dvorak-programmer" > /etc/vconsole.conf
-
-# Network configuration
-echo "archlinux" > /etc/hostname
-systemctl enable NetworkManager.service
-
-# Root password
-echo -e "arch\narch" | passwd
-
-# Boot loader
-efibootmgr --create --disk $disk --part 1 --label "Arch Linux" --loader /vmlinuz-linux --unicode "root=$root resume=$swap rw initrd=\intel-ucode.img initrd=\initramfs-linux.img"
-
-# Add a user
-useradd -m -G wheel -s /bin/zsh $username
-echo -e "arch\narch" | passwd $username
-sed -i 's/# %wheel ALL=(ALL:ALL) NOPASSWD: ALL/%wheel ALL=(ALL:ALL) NOPASSWD: ALL/g' /etc/sudoers
-
-# Audio
-systemctl start pipewire-pulse.service
-
-# Install suckless tools
-mkdir /home/$username/.config
-cd /home/$username/.config
-for tool in dwm st dwmblocks; do
-    git clone "https://github.com/s3mv4/$tool" 
-    cd $tool
-    sudo make install
-    cd ..
-done
-
-# Deploy ~/.dotfiles
-cd /home/$username
-git clone https://github.com/s3mv4/.dotfiles
-for dotfile in .xinitrc .zshrc .zshenv .zprofile .config/nvim .config/picom; do
-    ln -s /home/$username/.dotfiles/$dotfile /home/$username/
-done
-
-# Reboot
-exit
-reboot
+export disk
+export root
+export swap
+export username
+arch-chroot /mnt ./chroot
