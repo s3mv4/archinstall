@@ -24,7 +24,7 @@ else
     root=${disk}3
 fi
 
-wipefs -a $disk
+wipefs -af $disk
 
 (
 echo "g"
