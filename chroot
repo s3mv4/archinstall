@@ -40,12 +40,15 @@ for tool in dwm st dwmblocks; do
     git clone "https://github.com/s3mv4/$tool" 
     cd $tool
     sudo make install
+    make clean && rm -f config.h blocks.h
     cd ..
 done
+mkdir -p /home/$username/.local/share/fonts
+cp /home/$username/.config/dwm/fonts/* /home/$username/.local/share/fonts/
 
 # Deploy ~/.dotfiles
 cd /home/$username
 git clone https://github.com/s3mv4/.dotfiles
 for dotfile in .xinitrc .zshrc .zshenv .zprofile .config/nvim .config/picom; do
-    ln -s /home/$username/.dotfiles/$dotfile /home/$username/
+    ln -s /home/$username/.dotfiles/$dotfile /home/$username/$dotfile
 done
