@@ -1,0 +1,121 @@
+#!/bin/bash
+
+#      _____                _  _
+#  ___|___ / _ __ _____   _| || |
+# / __| |_ \| '_ ` _ \ \ / / || |_
+# \__ \___) | | | | | \ V /|__   _|
+# |___/____/|_| |_| |_|\_/    |_|
+
+# Config
+echo -n "Swap size: "
+read swap_size
+echo -n "Username: "
+read username
+
+# Partition the disks
+disk=$(fdisk -l | awk 'NR == 1 {print substr($2, 1, length($2)-1)}')
+if [[ $disk =~ "nvme" ]]; then
+    esp=${disk}p1
+    swap=${disk}p2
+    root=${disk}p3
+else
+    esp=${disk}1
+    swap=${disk}2
+    root=${disk}3
+fi
+
+wipefs -a $disk
+
+(
+echo "g"
+echo "n"
+echo "1"
+echo ""
+echo "+128M"
+echo "t"
+echo "1"
+echo "n"
+echo "2"
+echo ""
+echo "+$swap_size"
+echo "t"
+echo "2"
+echo "19"
+echo "n"
+echo "3"
+echo ""
+echo ""
+echo "w"
+) | fdisk $disk
+
+# Format the partitions
+mkfs.ext4 $root
+mkswap $swap
+mkfs.fat -F 32 $esp
+
+# Mount the file systems
+mount $root /mnt
+mount --mkdir $esp /mnt/boot
+swapon $swap
+
+# Install essential packages
+product_family=$(cat /sys/devices/virtual/dmi/id/product_family)
+if [[ $product_family == "Surface" ]]; then
+    pacstrap -K /mnt base linux linux-firmware linux-firmware-marvell intel-ucode networkmanager vim man sudo xorg-server xorg-xinit xorg-setxkbmap xorg-xset pipewire pipewire-audio pipewire-pulse feh picom git libxft libxinerama neovim zsh zsh-autosuggestions zsh-syntax-highlighting
+else
+    pacstrap -K /mnt base linux linux-firmware intel-ucode networkmanager vim man sudo xorg-server xorg-xinit xorg-setxkbmap xorg-xset pipewire pipewire-audio pipewire-pulse feh picom git libxft libxinerama neovim zsh zsh-autosuggestions zsh-syntax-highlighting
+fi
+
+# Fstab
+genfstab -U /mnt >> /mnt/etc/fstab
+
+# Chroot
+arch-chroot /mnt
+
+# Time zone
+ln -sf /usr/share/zoneinfo/Europe/Amsterdam /etc/localtime
+
+# Localization
+sed -i 's/#en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/g' /etc/locale.gen
+locale-gen
+echo "LANG=en_US.UTF-8" > /etc/locale.conf
+echo "KEYMAP=dvorak-programmer" > /etc/vconsole.conf
+
+# Network configuration
+echo "archlinux" > /etc/hostname
+systemctl enable NetworkManager.service
+
+# Root password
+echo -e "arch\narch" | passwd
+
+# Boot loader
+efibootmgr --create --disk $disk --part 1 --label "Arch Linux" --loader /vmlinuz-linux --unicode "root=$root resume=$swap rw initrd=\intel-ucode.img initrd=\initramfs-linux.img"
+
+# Add a user
+useradd -m -G wheel -s /bin/zsh $username
+echo -e "arch\narch" | passwd $username
+sed -i 's/# %wheel ALL=(ALL:ALL) NOPASSWD: ALL/%wheel ALL=(ALL:ALL) NOPASSWD: ALL/g' /etc/sudoers
+
+# Audio
+systemctl start pipewire-pulse.service
+
+# Install suckless tools
+mkdir /home/$username/.config
+cd /home/$username/.config
+for tool in dwm st dwmblocks; do
+    git clone "https://github.com/s3mv4/$tool" 
+    cd $tool
+    sudo make install
+    cd ..
+done
+
+# Deploy ~/.dotfiles
+cd /home/$username
+git clone https://github.com/s3mv4/.dotfiles
+for dotfile in .xinitrc .zshrc .zshenv .zprofile .config/nvim .config/picom; do
+    ln -s /home/$username/.dotfiles/$dotfile /home/$username/
+done
+
+# Reboot
+exit
+reboot
