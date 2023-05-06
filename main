@@ -59,9 +59,9 @@ swapon $swap
 # Install essential packages
 product_family=$(cat /sys/devices/virtual/dmi/id/product_family)
 if [[ $product_family == "Surface" ]]; then
-    pacstrap -K /mnt base linux linux-firmware linux-firmware-marvell efibootmgr intel-ucode networkmanager vim man sudo xorg-server xorg-xinit xorg-setxkbmap xorg-xset pipewire pipewire-audio pipewire-pulse feh picom git libxft libxinerama make gcc pkgconf scrot brightnessctl iw neovim zsh zsh-autosuggestions zsh-syntax-highlighting
+    pacstrap -K /mnt base linux linux-firmware linux-firmware-marvell efibootmgr intel-ucode networkmanager vim man sudo xorg-server xorg-xinit xorg-setxkbmap xorg-xset pipewire pipewire-audio pipewire-pulse feh picom git libxft libxinerama make gcc pkgconf scrot brightnessctl iw firefox neovim zsh zsh-autosuggestions zsh-syntax-highlighting
 else
-    pacstrap -K /mnt base linux linux-firmware efibootmgr intel-ucode networkmanager vim man sudo xorg-server xorg-xinit xorg-setxkbmap xorg-xset pipewire pipewire-audio pipewire-pulse feh picom git libxft libxinerama make gcc pkgconf scrot brightnessctl iw neovim zsh zsh-autosuggestions zsh-syntax-highlighting
+    pacstrap -K /mnt base linux linux-firmware efibootmgr intel-ucode networkmanager vim man sudo xorg-server xorg-xinit xorg-setxkbmap xorg-xset pipewire pipewire-audio pipewire-pulse feh picom git libxft libxinerama make gcc pkgconf scrot brightnessctl iw firefox neovim zsh zsh-autosuggestions zsh-syntax-highlighting
 fi
 
 # Fstab
