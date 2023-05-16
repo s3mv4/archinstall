@@ -45,6 +45,7 @@ for tool in dwm st dwmblocks; do
 done
 mkdir -p /home/$username/.local/share/fonts
 cp /home/$username/.config/dwm/fonts/* /home/$username/.local/share/fonts/
+ln -s /home/$username/.config/dwmblocks/scripts/* /home/$username/.local/bin/
 for tool in dmenu slock; do
     git clone "https://git.suckless.org/$tool" 
     cd $tool
