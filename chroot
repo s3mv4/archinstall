@@ -60,6 +60,7 @@ git clone https://github.com/s3mv4/.dotfiles
 for dotfile in .xinitrc .zshrc .zshenv .zprofile .config/nvim .config/picom; do
     ln -s /home/$username/.dotfiles/$dotfile /home/$username/$dotfile
 done
+ln -s /home/$username/.dotfiles/.local/bin/* /home/$username/.local/bin/
 git clone --depth 1 https://github.com/wbthomason/packer.nvim\
  /home/$username/.local/share/nvim/site/pack/packer/start/packer.nvim
 
