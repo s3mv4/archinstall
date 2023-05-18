@@ -31,7 +31,7 @@ echo -e "arch\narch" | passwd $username
 sed -i 's/# %wheel ALL=(ALL:ALL) NOPASSWD: ALL/%wheel ALL=(ALL:ALL) NOPASSWD: ALL/g' /etc/sudoers
 
 # Audio
-systemctl start pipewire-pulse.service
+systemctl enable pipewire-pulse.service
 
 # Install suckless tools
 mkdir /home/$username/.config
@@ -63,6 +63,12 @@ done
 ln -s /home/$username/.dotfiles/.local/bin/* /home/$username/.local/bin/
 git clone --depth 1 https://github.com/wbthomason/packer.nvim\
  /home/$username/.local/share/nvim/site/pack/packer/start/packer.nvim
+
+# Interception-tools
+echo "- JOB: "intercept -g $DEVNODE | caps2esc | uinput -d $DEVNODE"
+  DEVICE:
+    EVENTS:
+      EV_KEY: [KEY_CAPSLOCK, KEY_ESC]" > /etc/interception/udevmon.yaml
 
 # Chown
 chown -R $username:$username /home/$username
