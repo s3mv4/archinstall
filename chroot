@@ -57,7 +57,7 @@ done
 # Deploy ~/.dotfiles
 cd /home/$username
 git clone https://github.com/s3mv4/.dotfiles
-for dotfile in .xinitrc .zshrc .zshenv .zprofile .config/nvim .config/picom; do
+for dotfile in .xinitrc .zshrc .zshenv .zprofile .config/nvim .config/picom .config/tmux; do
     ln -s /home/$username/.dotfiles/$dotfile /home/$username/$dotfile
 done
 ln -s /home/$username/.dotfiles/.local/bin/* /home/$username/.local/bin/
